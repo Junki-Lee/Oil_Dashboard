@@ -13,6 +13,8 @@ import joblib
 st.title("Compnent 3 Analysis")
 
 data_path = './data/component3_imputed.csv'
+model_path = './models/component3.joblib'
+
 
 def load_model(model_path):
     model = joblib.load(model_path)
@@ -30,10 +32,10 @@ def preprocess_data(df, target_column='Y_LABEL'):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
     return X, y, X_train, X_test, y_train, y_test
 
-def train_student_model(X_train, y_train):
-    student_model = XGBClassifier(random_state=42)
-    student_model.fit(X_train, y_train)
-    return student_model
+# def train_student_model(X_train, y_train):
+#     student_model = XGBClassifier(random_state=42)
+#     student_model.fit(X_train, y_train)
+#     return student_model
 
 
 selected_features = ['AL', 'CA', 'P', 'B', 'S']
@@ -43,7 +45,7 @@ df = load_data(data_path, selected_features)
 X, y, X_train, X_test, y_train, y_test = preprocess_data(df, target_column='Y_LABEL')
 
 # 학생 모델 학습
-student_model = train_student_model(X_train, y_train)
+student_model = load_model(model_path)
 
 # UI 섹션
 st.title('건설장비 고장 예측')

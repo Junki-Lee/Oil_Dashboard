@@ -8,6 +8,8 @@ from src.utils import load_data
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import plotly.graph_objects as go
+
 
 # st.title("Data 1 Analysis")
 
@@ -109,7 +111,7 @@ import numpy as np
 #     else:
 #         st.write("🟢 건설 장비가 정상 작동할 가능성이 높습니다.")
 
-st.title("Data 4 Analysis")
+st.title("Component 4 Analysis")
 
 # 데이터 로드
 data = load_data('data/data4_imputed.csv')
@@ -225,10 +227,84 @@ data = load_data('data/data4_imputed.csv')
 #     else:
 #         st.write(f"🔴 예방 유지보수가 비용 절감에 도움이 되지 않습니다. 유지보수 전략을 재검토하세요.")
 
+# # YEAR 선택 및 Y_LABEL이 1인 데이터 출력
+# st.title('YEAR 선택에 따른 Y_LABEL 데이터')
+# year_selected = st.selectbox('YEAR를 선택하세요', sorted(data['YEAR'].unique()))
+
+# filtered_data = data[(data['YEAR'] == year_selected) & (data['Y_LABEL'] == 1)]
+# st.write(f"{year_selected}년에 고장이 발생한 데이터:")
+# st.dataframe(filtered_data)
+
 # YEAR 선택 및 Y_LABEL이 1인 데이터 출력
 st.title('YEAR 선택에 따른 Y_LABEL 데이터')
-year_selected = st.selectbox('YEAR를 선택하세요', sorted(data['YEAR'].unique()))
 
-filtered_data = data[(data['YEAR'] == year_selected) & (data['Y_LABEL'] == 1)]
+# YEAR 값을 정수형으로 변환
+data['YEAR'] = data['YEAR'].astype(int)
+
+year_selected = st.selectbox('YEAR를 선택하세요', sorted(data['YEAR'].unique()), key='year_select')
+
+# 선택된 YEAR의 데이터 필터링
+filtered_data = data[data['YEAR'] == year_selected]
+
+# 정상품과 불량품의 개수 계산
+sizes = [filtered_data['Y_LABEL'].value_counts().get(0, 0), filtered_data['Y_LABEL'].value_counts().get(1, 0)]
+
+# # 선택된 YEAR의 정상품 및 불량품 비율 pie chart 추가
+# st.title(f'{year_selected}년의 정상품 및 불량품 비율')
+# labels = ['Pass', 'Fail']
+# sizes = [filtered_data['Y_LABEL'].value_counts().get(0, 0), filtered_data['Y_LABEL'].value_counts().get(1, 0)]
+# colors = ['#00ff00', '#ff0000']
+# explode = (0.1, 0)
+
+# fig1, ax1 = plt.subplots()  # fig1, ax1을 5x5인치로 설정하여 크기 조정
+# ax1.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%', shadow=True, startangle=90)
+# ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+# st.pyplot(fig1)
+
+# 선택된 YEAR의 정상품 및 불량품 비율 도넛 차트 추가
+st.title(f'{year_selected}년의 정상품 및 불량품 비율')
+
+fig = go.Figure()
+
+# 정상품 비율
+fig.add_trace(go.Indicator(
+    mode = "gauge+number",
+    value = (sizes[0] / sum(sizes)) * 100,
+    domain = {'x': [0, 0.5], 'y': [0, 1]},
+    title = {'text': "정상품 비율", 'font': {'size': 14}},
+    gauge = {
+        'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "black"},
+        'bar': {'color': "green"},
+        'bgcolor': "white",
+        'borderwidth': 2,
+        'bordercolor': "gray",
+    },
+    number = {'suffix': "%"}
+))
+
+# 불량품 비율
+fig.add_trace(go.Indicator(
+    mode = "gauge+number",
+    value = (sizes[1] / sum(sizes)) * 100,
+    domain = {'x': [0.5, 1], 'y': [0, 1]},
+    title = {'text': "불량품 비율", 'font': {'size': 14}},
+    gauge = {
+        'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "black"},
+        'bar': {'color': "red"},
+        'bgcolor': "white",
+        'borderwidth': 2,
+        'bordercolor': "gray",
+    },
+    number = {'suffix': "%"}
+))
+
+fig.update_layout(
+    height=300,
+    margin={'t': 20, 'b': 20, 'l': 20, 'r': 20}
+)
+
+st.plotly_chart(fig)
+
 st.write(f"{year_selected}년에 고장이 발생한 데이터:")
-st.dataframe(filtered_data)
+st.dataframe(filtered_data[filtered_data['Y_LABEL'] == 1])
