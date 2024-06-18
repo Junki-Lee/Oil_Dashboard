@@ -13,21 +13,39 @@ import joblib
 st.title("Compnent 2 Analysis")
 
 data_path = './data/component2_imputed.csv'
+model_path = './models/component2.joblib'
 
-# train test 분리
+
+def load_model(model_path):
+    model = joblib.load(model_path)
+    print(f"Model loaded from {model_path}")
+    return model
+
+def load_data(data_path, selected_features):
+    df = pd.read_csv(data_path)
+    df = df[selected_features + ['Y_LABEL']]  
+    return df
+
 def preprocess_data(df, target_column='Y_LABEL'): 
     X = df.drop(target_column, axis=1)
     y = df[target_column]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
     return X, y, X_train, X_test, y_train, y_test
 
-# 데이터 로드
-data = load_data(data_path)
-X, y, X_train, X_test, y_train, y_test = preprocess_data(data, target_column='Y_LABEL')
+# def train_student_model(X_train, y_train):
+#     student_model = XGBClassifier(random_state=42)
+#     student_model.fit(X_train, y_train)
+#     return student_model
 
 
-# 모델 훈련
-model = joblib.load('C:/Users/USER/projects/LS_project4/oil_dashboard/models/component2_imputed_model.joblib')
+selected_features = ['AL', 'CA', 'FE', 'U4', 'BA']
+
+# 데이터 로드 및 전처리
+df = load_data(data_path, selected_features)
+X, y, X_train, X_test, y_train, y_test = preprocess_data(df, target_column='Y_LABEL')
+
+# 학생 모델 학습
+student_model = load_model(model_path)
 
 # UI 섹션
 st.title('건설장비 고장 예측')
@@ -39,92 +57,24 @@ st.write("""
 """)
 
 # Input fields for the elements
-ag_default = data['AG'].mean()
-al_default = data['AL'].mean()
-b_default = data['B'].mean()
-ba_default = data['BA'].mean()
-be_default = data['BE'].mean()
-ca_default = data['CA'].mean()
-cd_default = data['CD'].mean()
-co_default = data['CO'].mean()
-cr_default = data['CR'].mean()
-cu_default = data['CU'].mean()
-fe_default = data['FE'].mean()
-h20_default = data['H2O'].mean()
-k_default = data['K'].mean()
-li_default = data['LI'].mean()
-mg_default = data['MG'].mean()
-mn_default = data['MN'].mean()
-mo_default = data['MO'].mean()
-na_default = data['NA'].mean()
-ni_default = data['NI'].mean()
-p_default = data['P'].mean()
-pb_default = data['PB'].mean()
-pqindex_default = data['PQINDEX'].mean()
-s_default = data['S'].mean()
-sb_default = data['SB'].mean()
-si_default = data['SI'].mean()
-sn_default = data['SN'].mean()
-ti_default = data['TI'].mean()
-u100_default = data['U100'].mean()
-u75_default = data['U75'].mean()
-u50_default = data['U50'].mean()
-u25_default = data['U25'].mean()
-u20_default = data['U20'].mean()
-u14_default = data['U14'].mean()
-u6_default = data['U6'].mean()
-u4_default = data['U4'].mean()
-v_default = data['V'].mean()
-v40_default = data['V40'].mean()
-zn_default = data['ZN'].mean()
+al_default = df['AL'].mean()
+ca_default = df['CA'].mean()
+fe_default = df['FE'].mean()
+u4_default = df['U4'].mean()
+ba_default = df['BA'].mean()
 
-max = 20000
-
-ag = st.number_input('AG', min_value=0.0, max_value=10000.0, step=0.1, value=ag_default)
-al = st.number_input('AL', min_value=0.0, max_value=10000.0, step=0.1, value=al_default)
-b = st.number_input('B', min_value=0.0, max_value=10000.0, step=0.1, value=b_default)
-ba = st.number_input('BA', min_value=0.0, max_value=10000.0, step=0.1, value=ba_default)
-be = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=be_default)
-ca = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=ca_default)
-cd= st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=cd_default)
-co = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=co_default)
-cr = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=cr_default)
-cu = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=cu_default)
-fe = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=fe_default)
-h20 = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=h20_default)
-k = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=k_default)
-li = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=li_default)
-mg = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=mg_default)
-mn = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=mn_default)
-mo = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=mo_default)
-na = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=na_default)
-ni = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=ni_default)
-p = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=p_default)
-pb = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=pb_default)
-pqindex = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=pqindex_default)
-s = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=s_default)
-sb = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=sb_default)
-si = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=si_default)
-sn = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=sn_default)
-ti = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=ti_default)
-u100 = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=u100_default)
-u75 = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=u75_default)
-u50 = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=u50_default)
-u25 = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=u25_default)
-u20 = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=u20_default)
-u14 = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=u14_default)
-u6 = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=u6_default)
-u4 = st.number_input('BE', min_value=0.0, max_value=20000.0, step=0.1, value=u4_default)
-v = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=v_default)
-v40 = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=v40_default)
-zn = st.number_input('BE', min_value=0.0, max_value=10000.0, step=0.1, value=zn_default)
+al = st.number_input('AL', min_value=0.0, max_value=50000.0, step=0.1, value=al_default)
+ca = st.number_input('CA', min_value=0.0, max_value=50000.0, step=0.1, value=ca_default)
+fe = st.number_input('FE', min_value=0.0, max_value=50000.0, step=0.1, value=fe_default)
+u4 = st.number_input('U4', min_value=0.0, max_value=50000.0, step=0.1, value=u4_default)
+ba = st.number_input('BA', min_value=0.0, max_value=50000.0, step=0.1, value=ba_default)
 
 if st.button('예측'):
     # Prepare the input data
-    input_data = np.array([[ag, al, b, ba, be, ca, cd, co, cr, cu, fe, h20, k, li, mg, mn, mo, na, ni, p, pb, pqindex, s, sb, si, sn, ti, u100, u75, u50, u25, u20, u14, u6, u4, v, v40, zn]])
+    input_data = np.array([[al, ca, fe, u4, ba]])
     # Make prediction
-    prediction_proba = model.predict_proba(input_data) * 100
-    prediction = model.predict(input_data)
+    prediction_proba = student_model.predict_proba(input_data) * 100
+    prediction = student_model.predict(input_data)
 
     # Display prediction
     st.write(f"고장이 발생할 확률: {prediction_proba[0][1]:.2f} %")

@@ -8,26 +8,44 @@ from src.utils import load_data
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import joblib
 
 st.title("Compnent 4 Analysis")
 
-# 데이터 로드
-data = load_data('data/data4_imputed.csv')
+data_path = './data/component4_imputed.csv'
 
-# 선택된 변수들 추출
-selected_columns = ['AL', 'BA', 'SB', 'CR', 'ZN', 'Y_LABEL']
-data = data[selected_columns]
+def load_model(model_path):
+    model = joblib.load(model_path)
+    print(f"Model loaded from {model_path}")
+    return model
 
-# 특징과 타겟 정의
-X = data.drop(columns=['Y_LABEL'])
-y = data['Y_LABEL']
+def load_data(data_path, selected_features):
+    df = pd.read_csv(data_path)
+    df = df[selected_features + ['Y_LABEL']]  
+    return df
 
-# 데이터 분할
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+def preprocess_data(df, target_column='Y_LABEL'): 
+    X = df.drop(target_column, axis=1)
+    y = df[target_column]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    return X, y, X_train, X_test, y_train, y_test
 
-# 모델 훈련
-model = XGBClassifier()
-model.fit(X_train, y_train)
+def train_student_model(X_train, y_train):
+    student_model = XGBClassifier(random_state=42)
+    student_model.fit(X_train, y_train)
+    return student_model
+
+
+selected_features = ['CA', 'AL', 'MO', 'V40', 'BA']
+
+# 데이터 로드 및 전처리
+df = load_data(data_path, selected_features)
+X, y, X_train, X_test, y_train, y_test = preprocess_data(df, target_column='Y_LABEL')
+
+# 학생 모델 학습
+# student_model = train_student_model(X_train, y_train)
+
+load_model(model_path)
 
 # UI 섹션
 st.title('건설장비 고장 예측')
@@ -39,24 +57,24 @@ st.write("""
 """)
 
 # Input fields for the elements
-al_default = data['AL'].mean()
-ba_default = data['BA'].mean()
-sb_default = data['SB'].mean()
-cr_default = data['CR'].mean()
-zn_default = data['ZN'].mean()
+al_default = df['AL'].mean()
+ca_default = df['CA'].mean()
+p_default = df['P'].mean()
+b_default = df['B'].mean()
+s_default = df['S'].mean()
 
-al = st.number_input('알루미늄 (Al)', min_value=0.0, max_value=10000.0, step=0.1, value=al_default)
-ba = st.number_input('바륨 (Ba)', min_value=0.0, max_value=10000.0, step=0.1, value=ba_default)
-sb = st.number_input('안티모니 (Sb)', min_value=0.0, max_value=10000.0, step=0.1, value=sb_default)
-cr = st.number_input('크롬 (Cr)', min_value=0.0, max_value=10000.0, step=0.1, value=cr_default)
-zn = st.number_input('아연 (Zn)', min_value=0.0, max_value=10000.0, step=0.1, value=zn_default)
+al = st.number_input('AL', min_value=0.0, max_value=50000.0, step=0.1, value=al_default)
+ca = st.number_input('CA', min_value=0.0, max_value=50000.0, step=0.1, value=ca_default)
+p = st.number_input('P', min_value=0.0, max_value=50000.0, step=0.1, value=p_default)
+b = st.number_input('B', min_value=0.0, max_value=50000.0, step=0.1, value=b_default)
+s = st.number_input('S', min_value=0.0, max_value=50000.0, step=0.1, value=s_default)
 
 if st.button('예측'):
     # Prepare the input data
-    input_data = np.array([[al, ba, sb, cr, zn]])
+    input_data = np.array([[al, ca, p, b, s]])
     # Make prediction
-    prediction_proba = model.predict_proba(input_data) * 100
-    prediction = model.predict(input_data)
+    prediction_proba = student_model.predict_proba(input_data) * 100
+    prediction = student_model.predict(input_data)
 
     # Display prediction
     st.write(f"고장이 발생할 확률: {prediction_proba[0][1]:.2f} %")
@@ -75,9 +93,9 @@ st.write("""
 """)
 
 # Input fields for maintenance costs
-maintenance_cost = st.number_input('부품 교체 비용 (만원)', min_value=0.0, max_value=10000.0, step=0.1, value=700.0)
-preventive_maintenance_cost = st.number_input('부품 수리 비용 (만원)', min_value=0.0, max_value=10000.0, step=0.1, value=300.0)
-failure_rate = st.number_input('고장 확률 (%)', min_value=0.0, max_value=100.0, step=0.1, value=20.0)
+maintenance_cost = st.number_input('부품 교체 비용 (만원)', min_value=0.0, max_value=10000.0, step=0.1, value=800.0)
+preventive_maintenance_cost = st.number_input('부품 수리 비용 (만원)', min_value=0.0, max_value=10000.0, step=0.1, value=350.0)
+failure_rate = st.number_input('고장 확률 (%)', min_value=0.0, max_value=100.0, step=0.1)
 
 if st.button('비용 절감 계산'):
     # Calculate cost savings
