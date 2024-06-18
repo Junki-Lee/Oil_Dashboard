@@ -92,9 +92,9 @@ st.write("""
 예측 알고리즘을 통해 유지보수 비용 절감 효과를 계산해보세요.
 """)
 
-# Input fields for maintenance costs
-maintenance_cost = st.number_input('부품 교체 비용 (만원)', min_value=0.0, max_value=10000.0, step=0.1, value=800.0)
-preventive_maintenance_cost = st.number_input('부품 수리 비용 (만원)', min_value=0.0, max_value=10000.0, step=0.1, value=350.0)
+# Input fields for maintenance cost
+maintenance_cost = st.number_input('부품 교체 비용 (만원)', min_value=0.0, max_value=10000.0, step=0.1, value=300.0)
+preventive_maintenance_cost = st.number_input('부품 수리 비용 (만원)', min_value=0.0, max_value=10000.0, step=0.1, value=80.0)
 failure_rate = st.number_input('고장 확률 (%)', min_value=0.0, max_value=100.0, step=0.1)
 
 if st.button('비용 절감 계산'):
